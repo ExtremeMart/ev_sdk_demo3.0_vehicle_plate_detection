@@ -103,6 +103,7 @@ ev_sdk
         ..............
     }    
 ```
+
 3. SampleDetector.cpp 中我们封装了一个基于tensorrt的YolovX目标检测类.
 4. demo运行的基础镜像及容器启动命令
    
@@ -115,7 +116,8 @@ nvidia-docker run -itd --privileged ccr.ccs.tencentyun.com/public_images/ubuntu1
 ```
 ### [demo测试](#jump_dev_test)
 我们按照[开发SDK的一般步骤](#jump_dev)编译并授权过后即可运行测试工具,测试工具主要提供一下几个功能
-```
+
+```"shell"
 ---------------------------------
 usage:
   -h  --help        show help information 显示帮助信息
@@ -134,18 +136,49 @@ usage:
                     for example: -r 100
 ---------------------------------
 ```
-下面我们对部分功能进行详细的说明
-1. 测试功能, 1-4指ji.cpp中对应的四个接口, 5会在每次调用前后执行ji_create_predictor,ji_destroy_predictor接口初始化和反初始化算法,以测试SDK是否能够正确释放资源,指定功能5的时候一定要和-r参数配合使用,在运行过程中监控test-ji-api的内存占用,显存占用等是否不停的增长.
-   ```
-   在/usr/local/ev_sdk/bin路径下执行测试
-    ./test-ji-api -f 1 -i ../data/vp.jpeg -l ../authorization/license.txt -o result.jpg
-    ./test-ji-api -f 2 -i ../data/vp.jpeg -l ../authorization/license.txt -o result.jpg
-    ./test-ji-api -f 3 -i ../data/vp.jpeg -l ../authorization/license.txt -o result.jpg
-    ./test-ji-api -f 4 -i ../data/vp.mp4 -l ../authorization/license.txt -o result.mp4 #需要输入视频真实存在
-    ./test-ji-api -f 5 -i ../data/vp.jpeg -l ../authorization/license.txt -r -1 #无限循环调用
-   ```
-2. 测试参数,算法初始化时会从配置文件中加载默认配置参数,对于部分参数通过接口可以动态覆盖默认参数,如果项目要求能够动态指定的参数,需要测试通过-a传递的参数能够生效.例如,对于本demo的配置文件如下
-   ```
+
+下面我们对部分功能进行详细的说明(未说明的参数暂未实现)
+
+1. 指定调用功能的-f参数
+    1. -f 1指调用算法同步分析接口，调用该接口时主要支持如下几种输入方式:
+
+    ```"shell"
+        1.输入单张图片，需要指定输入输出文件
+        　　./test-ji-api -f 1 -i ../data/persons.jpg -o result.jpg
+        
+        2.输入多张图片(多张图片是指sdk一次调用ji_calc_image传入的图片数量不是指多次调用，每次传入一张图片)，需要指定输入输出文件
+            　./test-ji-api -f 1 -i ../data/persons.jpg,../data/persons.jpg -o result.jpg #输入两张图片
+        
+        3.输入视频，需要指定输入输出文件
+        　　./test-ji-api -f 1 -i ../data/test.mp4 -o test_result.mp4 
+
+        4.输入图片文件夹，只需指定输入文件夹即可，结果图片会保存在原图片文件的同一路径下，结果文件名和原文件名一一对应(名称中添加了result字段)
+        　　　./test-ji-api -f 1 -i ../data/　
+             图片列表文件格式如下:   
+                /usr/local/ev_sdk/data/a.jpg
+                /usr/local/ev_sdk/data/b.jpg
+                /usr/local/ev_sdk/data/c.png   
+    ```
+
+    2. -f 3指调用算法实例创建释放接口，该接口需要与-r参数配合使用，测试在循环创建/调用/释放的过程中是否存在内存/显存的泄露，与调用-f 1的区别在于，当-r参数指定调用次数时，-f 1只会创建一次实例，释放一次实例．
+
+    ```'shell'
+        ./test-ji-api -f 3 -i ../data/persons.jpg -o result.jpg -r -1 #无限循环调用
+
+        ./test-ji-api -f 3 -i ../data/persons.jpg -o result.jpg -r 100 #循环调用100次
+    ```
+
+    3. -f 5获取并打印算法的版本信息．
+
+    ```'shell'
+        ./test-ji-api -f 5
+    ```
+
+2. 指定输入的-i参数，使用方式见上文介绍.
+3. 指定输出的-o参数，使用方式见上文介绍. 
+4. 指定配置的-a参数,算法初始化时会从配置文件中加载默认配置参数,对于部分参数通过接口可以动态覆盖默认参数,如果项目要求能够动态指定的参数,需要测试通过-a传递的参数能够生效.例如,对于本demo的配置文件如下
+   
+   ```"json"
    {
     "draw_roi_area": true,    
     "roi_type": "polygon_1",
@@ -175,6 +208,7 @@ usage:
     ```
 
 配置文件中的polygon_1参数和language参数需要支持动态配置,则需要利用-a参数测试
+   
    ```
     //未指定参数
         ./test-ji-api -f 1 -i ../data/vp.jpeg -l ../authorization/license.txt -o result.jpg
@@ -184,6 +218,7 @@ usage:
         -a "{\"polygon_1\": [\"POLYGON((0.2 0.2, 0.8 0, 0.8 0.8, 0 0.8))\"],\"language\":\"zh\"}"
         -l ../authorization/license.txt -o result.jpg
    ```
+
 以下为默认参数的输出效果  
 
 ![alt 默认参数](doc/figure1.jpg)
