@@ -140,43 +140,36 @@ usage:
 下面我们对部分功能进行详细的说明(未说明的参数暂未实现)
 
 1. 指定调用功能的-f参数
-    1. -f 1指调用算法同步分析接口，调用该接口时主要支持如下几种输入方式:
+    1. -f 1/2/3指调用算法分析接口，调用该接口时主要支持如下几种输入方式:
 
     ```"shell"
         1.输入单张图片，需要指定输入输出文件
-        　　./test-ji-api -f 1 -i ../data/persons.jpg -o result.jpg
-        
-        2.输入多张图片(多张图片是指sdk一次调用ji_calc_image传入的图片数量不是指多次调用，每次传入一张图片)，需要指定输入输出文件
-            　./test-ji-api -f 1 -i ../data/persons.jpg,../data/persons.jpg -o result.jpg #输入两张图片
-        
-        3.输入视频，需要指定输入输出文件
-        　　./test-ji-api -f 1 -i ../data/test.mp4 -o test_result.mp4 
-
-        4.输入图片文件夹，只需指定输入文件夹即可，结果图片会保存在原图片文件的同一路径下，结果文件名和原文件名一一对应(名称中添加了result字段)
-        　　　./test-ji-api -f 1 -i ../data/　
-             图片列表文件格式如下:   
-                /usr/local/ev_sdk/data/a.jpg
-                /usr/local/ev_sdk/data/b.jpg
-                /usr/local/ev_sdk/data/c.png   
+        　　./test-ji-api -l license.txt -f 1/2/3 -i ../data/persons.jpg -o result.jpg
+                       
+        2.-f 1 除了支持图片输入以外还支持视频输入，需要指定输入输出文件
+        　　./test-ji-api -l license.txt -f 1 -i ../data/test.mp4 -o test_result.mp4         
     ```
 
-    2. -f 3指调用算法实例创建释放接口，该接口需要与-r参数配合使用，测试在循环创建/调用/释放的过程中是否存在内存/显存的泄露，与调用-f 1的区别在于，当-r参数指定调用次数时，-f 1只会创建一次实例，释放一次实例．
+    2. -f 4指调用视频分析接口，调用该接口时主要支持如下输入方式:
+
+    ```"shell"
+        1.输入视频文件，需要指定输入输出文件
+        　　./test-ji-api -l license.txt -f 4 -i ../data/test.mp4 -o result.mp4
+    ```
+
+    3. -f 5指调用算法实例创建释放接口，该接口需要与-r参数配合使用，测试在循环创建/调用/释放的过程中是否存在内存/显存的泄露，与调用-f 1的区别在于，当-r参数指定调用次数时，-f 1只会创建一次实例，释放一次实例．
 
     ```'shell'
-        ./test-ji-api -f 3 -i ../data/persons.jpg -o result.jpg -r -1 #无限循环调用
+        ./test-ji-api -l license.txt  -f 5 -i ../data/persons.jpg -o result.jpg -r -1 #无限循环调用
 
-        ./test-ji-api -f 3 -i ../data/persons.jpg -o result.jpg -r 100 #循环调用100次
+        ./test-ji-api -l license.txt -f 5 -i ../data/persons.jpg -o result.jpg -r 100 #循环调用100次
     ```
 
-    3. -f 5获取并打印算法的版本信息．
-
-    ```'shell'
-        ./test-ji-api -f 5
-    ```
-
-2. 指定输入的-i参数，使用方式见上文介绍.
-3. 指定输出的-o参数，使用方式见上文介绍. 
-4. 指定配置的-a参数,算法初始化时会从配置文件中加载默认配置参数,对于部分参数通过接口可以动态覆盖默认参数,如果项目要求能够动态指定的参数,需要测试通过-a传递的参数能够生效.例如,对于本demo的配置文件如下
+2. 指定授权文件的路径-l参数，使用方式见上文介绍.
+3. 指定输入的-i参数，使用方式见上文介绍.
+4. 指定输出的-o参数，使用方式见上文介绍.
+5. 指定调用次数的-r参数,使用方式见上文介绍.
+6. 指定配置的-a参数,算法初始化时会从配置文件中加载默认配置参数,对于部分参数通过接口可以动态覆盖默认参数,如果项目要求能够动态指定的参数,需要测试通过-a传递的参数能够生效.例如,对于本demo的配置文件如下
    
    ```"json"
    {
